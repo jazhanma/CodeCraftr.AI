@@ -1,0 +1,9 @@
+2025-02-01 01:28:08,334 - INFO - Script started.
+2025-02-01 01:28:08,335 - INFO - Sample data written to sample_data.json
+2025-02-01 01:28:09,343 - INFO - Processed data written to processed_data.json
+2025-02-01 01:28:10,597 - INFO - API Response: {'status': 'success', 'received_data': {'test_id': 0}, 'processed_at': '2025-02-01T01:28:10.597983'}
+2025-02-01 01:28:10,947 - INFO - API Response: {'status': 'success', 'received_data': {'test_id': 2}, 'processed_at': '2025-02-01T01:28:10.947277'}
+2025-02-01 01:28:11,007 - INFO - API Response: {'status': 'success', 'received_data': {'test_id': 1}, 'processed_at': '2025-02-01T01:28:11.007907'}
+2025-02-01 01:28:11,198 - INFO - API Response: {'status': 'success', 'received_data': {'test_id': 3}, 'processed_at': '2025-02-01T01:28:11.198169'}
+2025-02-01 01:28:11,204 - INFO - API Response: {'status': 'success', 'received_data': {'test_id': 4}, 'processed_at': '2025-02-01T01:28:11.204816'}
+2025-02-01 01:28:11,204 - INFO - All API tests completed.
