@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeCraftr - Floppy Bird</title>
+
+    <!-- Inlined CSS -->
+    <style>
+      /* Global Reset */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #f4f4f4;
+      }
+
+      /* Container that holds both sidebars and main content */
+      .app-container {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      /* Sidebar (Left + Right) */
+      .sidebar {
+        width: 300px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 1.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      .right-sidebar {
+        border-left: none;
+      }
+
+      /* Main Content Section */
+      .main-content {
+        flex: 1;
+        padding: 2rem;
+        text-align: center;
+        background: #6868ca1f;
+      }
+
+      .summary-section {
+        margin-bottom: 2rem;
+      }
+      .summary-text {
+        font-size: 1.8rem;
+        margin-bottom: 0.8rem;
+      }
+
+      /* Code Snippet Styles */
+      #codeInput {
+        width: 80%;
+        margin: 1rem auto;
+        font-family: monospace;
+        font-size: 1rem;
+        display: block;
+      }
+
+      #snippetLink {
+        margin-top: 1rem;
+      }
+      #snippetLink a {
+        color: blue;
+        text-decoration: underline;
+        word-break: break-all; /* so long URLs wrap properly */
+      }
+
+      /* Floppy Bird Canvas */
+      #flappyGame {
+        background: linear-gradient(to bottom, #87CEEB, #4A90E2);
+        display: block;
+        border: 2px solid black;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="app-container">
+      <!-- Left Sidebar (Navigation) -->
+      <div class="sidebar left-sidebar">
+        <h2>Menu</h2>
+        <nav>
+          <ul style="list-style-type: none;">
+            <li>Home</li>
+            <li>About</li>
+            <li>Contact</li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="summary-section">
+          <h1 class="summary-text">Empowering Your Code Journey with CodeCraftr</h1>
+          <p>Analyze, get smart AI suggestions, and run your code seamlessly with our AI-powered tools.</p>
+        </div>
+
+        <h1>Save & Share Code Snippets</h1>
+        <textarea id="codeInput" rows="6" placeholder="Enter your code here..."></textarea>
+        <button onclick="saveCode()">Save Code</button>
+        <p id="snippetLink"></p>
+      </div>
+
+      <!-- Right Sidebar (Floppy Bird Game) -->
+      <div class="sidebar right-sidebar">
+        <h2>Floppy Bird Game</h2>
+        <canvas id="flappyGame" width="300" height="500"></canvas>
+      </div>
+    </div>
+
+    <!-- Inline Script for code snippet logic & Floppy Bird game -->
+    <script>
+      /******************************************************
+       *               CODE SNIPPET LOGIC
+       ******************************************************/
+      // Saves the code snippet to localStorage under a unique ID
+      function saveCode() {
+        const code = document.getElementById("codeInput").value.trim();
+        if (!code) {
+          alert("Please enter some code before saving.");
+          return;
+        }
+        // Generate a unique snippet ID (e.g., snippet_ + timestamp)
+        const snippetId = "snippet_" + Date.now();
+
+        // Save to localStorage
+        localStorage.setItem(snippetId, code);
+
+        // Create a shareable link with ?id=snippetId
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareLink = `${baseUrl}?id=${snippetId}`;
+
+        // Display link
+        const snippetLinkElem = document.getElementById("snippetLink");
+        snippetLinkElem.innerHTML = `
+          <strong>Snippet Saved!</strong><br>
+          <a href="${shareLink}" target="_blank">Share Link: ${shareLink}</a>
+        `;
+      }
+
+      // Check if there's a ?id= param in the URL, load that code into textarea
+      function loadCodeFromQueryParam() {
+        const params = new URLSearchParams(window.location.search);
+        const snippetId = params.get("id");
+        if (!snippetId) return;
+
+        const savedCode = localStorage.getItem(snippetId);
+        if (savedCode) {
+          document.getElementById("codeInput").value = savedCode;
+        }
+      }
+
+      /******************************************************
+       *               FLAPPY BIRD GAME LOGIC
+       ******************************************************/
+      document.addEventListener("DOMContentLoaded", () => {
+        // Attempt to load snippet from URL param
+        loadCodeFromQueryParam();
+
+        // Initialize Flappy Bird
+        const canvas = document.getElementById("flappyGame");
+        const ctx = canvas.getContext("2d");
+
+        let bird = {
+          x: 50,
+          y: canvas.height / 2,
+          width: 30,
+          height: 30,
+          gravity: 0.4,
+          velocity: 0,
+          jump: -7,
+          color: "yellow",
+        };
+
+        let pipes = [];
+        let score = 0;
+        let gameOver = false;
+
+        function createPipe() {
+          let pipeGap = 130;
+          let pipeHeight = Math.floor(Math.random() * (canvas.height / 2)) + 50;
+          pipes.push({
+            x: canvas.width,
+            width: 50,
+            topHeight: pipeHeight,
+            bottomY: pipeHeight + pipeGap,
+            speed: 1.5,
+            color: "green",
+          });
+        }
+
+        function updateGame() {
+          if (gameOver) return;
+
+          bird.velocity += bird.gravity;
+          bird.y += bird.velocity;
+
+          // Bird hits top or bottom
+          if (bird.y + bird.height > canvas.height || bird.y < 0) {
+            gameOver = true;
+          }
+
+          for (let i = 0; i < pipes.length; i++) {
+            pipes[i].x -= pipes[i].speed;
+
+            // Collision detection with top or bottom pipe
+            if (
+              bird.x < pipes[i].x + pipes[i].width &&
+              bird.x + bird.width > pipes[i].x &&
+              (bird.y < pipes[i].topHeight || bird.y + bird.height > pipes[i].bottomY)
+            ) {
+              gameOver = true;
+            }
+
+            // Off-screen removal + increment score
+            if (pipes[i].x + pipes[i].width < 0) {
+              pipes.splice(i, 1);
+              score++;
+              i--;
+            }
+          }
+        }
+
+        function drawGame() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Draw bird (circle)
+          ctx.fillStyle = bird.color;
+          ctx.beginPath();
+          ctx.arc(bird.x + 15, bird.y + 15, 15, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Draw pipes
+          for (let pipe of pipes) {
+            ctx.fillStyle = pipe.color;
+            ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+            ctx.fillRect(
+              pipe.x,
+              pipe.bottomY,
+              pipe.width,
+              canvas.height - pipe.bottomY
+            );
+          }
+
+          // Draw score
+          ctx.fillStyle = "white";
+          ctx.font = "20px Arial";
+          ctx.fillText("Score: " + score, 10, 30);
+
+          // Game Over message
+          if (gameOver) {
+            ctx.fillStyle = "red";
+            ctx.font = "30px Arial";
+            ctx.fillText("Game Over!", canvas.width / 2 - 70, canvas.height / 2);
+            ctx.font = "20px Arial";
+            ctx.fillText(
+              "Press SPACE to Restart",
+              canvas.width / 2 - 100,
+              canvas.height / 2 + 40
+            );
+          }
+        }
+
+        function gameLoop() {
+          updateGame();
+          drawGame();
+          if (!gameOver) {
+            requestAnimationFrame(gameLoop);
+          }
+        }
+
+        document.addEventListener("keydown", (event) => {
+          if (event.code === "Space") {
+            if (!gameOver) {
+              // Bird jumps
+              bird.velocity = bird.jump;
+            } else {
+              // Restart
+              bird.y = canvas.height / 2;
+              bird.velocity = 0;
+              pipes = [];
+              score = 0;
+              gameOver = false;
+              gameLoop();
+            }
+          }
+        });
+
+        // Generate pipes every 2.5 seconds
+        setInterval(createPipe, 2500);
+
+        // Start
+        gameLoop();
+      });
+    </script>
+  </body>
+</html>
