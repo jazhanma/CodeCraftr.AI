@@ -1,11 +1,10 @@
 services:
   - type: web
-    name: codecraftr-ai
+    name: CodeCraftr
     env: python
-    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: gunicorn app:app --chdir backend --bind 0.0.0.0:$PORT
     envVars:
       - key: PORT
         value: 8000
