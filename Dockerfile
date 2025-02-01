@@ -1,17 +1,20 @@
-# Use an official Python runtime as a parent image
-FROM python:3.12
+# Use an official Python runtime
+FROM python:3.10
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy all files
 COPY . /app/
 
-# Install dependencies **without creating a virtual environment**
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the application port (change if necessary)
+# Ensure database file exists inside the container
+RUN touch /app/database.db
+
+# Expose the port Flask runs on
 EXPOSE 8000
 
-# Command to run the application (update if needed)
+# Run the Flask app
 CMD ["python", "app.py"]
